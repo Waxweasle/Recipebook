@@ -1,0 +1,226 @@
+from tkinter import *
+from tkinter import messagebox
+import requests
+import webbrowser
+
+PLACE = 0
+
+
+class Gui:
+
+    def __init__(self, master):
+        # MAIN WINDOW
+        self.master = master
+        self.master.title("Recipe book")
+        self.bg = PhotoImage(file="./food.png")
+        self.label1 = Label(self.master, image=self.bg)
+        self.label1.place(x=0, y=0)
+        self.master.geometry("736x1104")
+        self.master.minsize(736, 1104)
+        self.master.maxsize(736, 1104)
+
+        # TITLE
+        self.title = Label(text="RECIPE BOOK", font=("Helvetica", 40))
+        self.title.config(bg="#006E7F", fg="#FEFBE7")
+        self.title.grid(row=2, column=1)
+
+        # MAIN INGREDIENT
+        self.key_ingredient = Label(text="Main ingredient of the dish:", font=("Ariel", 15))
+        self.key_ingredient.config(bg="#006E7F", fg="#FEFBE7")
+        self.key_ingredient.grid(row=4, column=1)
+        self.key_ingredient_entry = Entry(width=22, justify='center', font=("Ariel", 15))
+        self.key_ingredient_entry.focus()
+        self.key_ingredient_entry.grid(row=5, column=1)
+        self.key_ingredient_entry.config(bg="#FEFBE7")
+
+        # NUMBER OF INGREDIENTS
+        self.num_ingredients = Label(text="Maximum number of ingredients:", font=("Ariel", 15))
+        self.num_ingredients.config(bg="#006E7F", fg="#FEFBE7")
+        self.num_ingredients.grid(row=7, column=1)
+        self.num_ingredients_entry = Entry(width=22, justify='center', font=("Ariel", 15))
+        self.num_ingredients_entry.grid(row=8, column=1)
+        self.num_ingredients_entry.config(bg="#FEFBE7")
+
+        # MEAL TIME
+        self.meal = StringVar()
+        self.meal.set('')
+        self.meal_type = Label(text="Which meal are you making?", font=("Ariel", 15))
+        self.meal_type.config(bg="#006E7F", fg="#FEFBE7")
+        self.meal_type.grid(row=10, column=1)
+        self.meal_type_menu = OptionMenu(self.master, self.meal, "Breakfast", "Lunch", "Dinner", "Snack")
+        self.meal_type_menu.config(bg="#FEFBE7", highlightthickness=0)
+        self.meal_type_menu.grid(row=11, column=1)
+
+        # CUISINE
+        self.culture = StringVar()
+        self.culture.set('')
+        self.cuisine = Label(text="Which type of cuisine would you like?", font=("Ariel", 15))
+        self.cuisine.config(bg="#006E7F", fg="#FEFBE7")
+        self.cuisine.grid(row=13, column=1)
+        self.cuisine_menu = OptionMenu(self.master, self.culture, "American", "Asian", "British", "Caribbean",
+                                                                  "Central Europe", "Chinese", "Eastern Europe",
+                                                                  "French", "Indian", "Italian", "Japanese",
+                                                                  "Mediterranean", "Mexican", "Middle Eastern",
+                                                                  "Nordic", "South American", "South East Asian")
+        self.cuisine_menu.config(bg="#FEFBE7", highlightthickness=0)
+        self.cuisine_menu.grid(row=14, column=1)
+
+        # DIET
+        self.diet_req = StringVar()
+        self.diet_req.set('')
+        self.diet = Label(text="(Optional) Do you have any special dietary requirements?", font=("Ariel", 15))
+        self.diet.config(bg="#006E7F", fg="#FEFBE7")
+        self.diet.grid(row=16, column=1)
+        self.diet_menu = OptionMenu(self.master, self.diet_req, "balanced", "high-fiber", "high-protein",
+                                                                "low-carb", "low-fat", "low-sodium")
+        self.diet_menu.config(bg="#FEFBE7", highlightthickness=0)
+        self.diet_menu.grid(row=17, column=1)
+
+        # SUBMIT RESULTS BUTTON
+        self.submit = Button(text="Find me some recipes!", font=("Ariel", 15), width=36, command=self.results_window)
+        self.submit.grid(column=1, row=19, columnspan=2)
+        self.submit.config(bg="#006E7F", fg="#FEFBE7")
+
+        # GRID SPACING
+        self.master.columnconfigure(0, minsize=123)
+        empty = [3, 6, 9, 12, 15, 18]
+        for x in empty:
+            self.master.grid_rowconfigure(x, minsize=100)
+
+    def results_window(self):
+        # POP UP WINDOW TO DISPLAY RECIPES
+        self.results = Toplevel(self.master)
+        self.results.title("Recipes")
+        self.img = PhotoImage(file="./bg2.png")
+        self.label2 = Label(self.results, image=self.img)
+        self.label2.image = self.img
+        self.label2.place(x=0, y=0)
+        self.results.geometry("1000x667")
+        self.results.minsize(1000, 667)
+
+        # GRID SIZING
+        self.results.columnconfigure(0, minsize=150)
+        empty = [0, 2, 4, 6]
+        for x in empty:
+            self.results.grid_rowconfigure(x, minsize=100)
+        self.recipes, self.ingredients, self.links = self.get_recipes()
+
+        # RETRIEVE API RESULTS
+        self.fill_results()
+
+    def fill_results(self):
+        try:
+            self.solo_ingredients = '\n'.join(self.ingredients[PLACE])
+            self.formatted_links = f"For the recipe method, head over to:\n" \
+                                   f"{self.links[PLACE]}"
+            self.formatted_ing = f"All you need for this recipe:\n" \
+                                 f"{self.solo_ingredients}"
+            self.recipe_name = Label(self.results, text=f"{self.recipes[PLACE]}", font=("Ariel", 20))
+            self.recipe_name.config(bg="#00B8A9", fg="#F9F7F7")
+            self.recipe_name.grid(column=1, row=1, columnspan=3)
+            self.ing_list = Label(self.results, text=f"{self.formatted_ing}", font=("Ariel", 12))
+            self.ing_list.config(bg="#00B8A9", fg="#F9F7F7")
+            self.ing_list.grid(column=1, row=3, columnspan=3)
+            self.site_link = Label(self.results, text=f"{self.formatted_links}", font=("Ariel", 12))
+            self.site_link.bind("<Button-1>", lambda e: self.go_to_site(self.links[PLACE]))
+            self.site_link.config(bg="#00B8A9", fg="#F9F7F7", cursor="hand2")
+            self.site_link.grid(column=1, row=5, columnspan=3)
+
+            # RECIPE NAVIGATION BUTTONS
+            self.f1 = Frame(self.results)
+            self.f1.grid(column=1, row=7)
+            self.next_button = Button(self.f1, text="Next", width=36, command=self.next_recipe)
+            self.next_button.config(font="Ariel", bg="#3D84A8", fg="#F9F7F7")
+            self.next_button.pack(side="right")
+            self.prev_button = Button(self.f1, text="Previous", width=36, command=self.prev_recipe)
+            self.prev_button.config(font="Ariel", bg="#3D84A8", fg="#F9F7F7")
+            self.prev_button.pack(side="left")
+        except IndexError:
+            self.search_error()
+
+    def next_recipe(self):
+        global PLACE
+        PLACE += 1
+        if PLACE >= len(self.recipes):
+            PLACE = 0
+        self.individual_ingredients = '\n'.join(self.ingredients[PLACE])
+        self.formatted_links = f"For the recipe method, head over to:\n" \
+                               f"{self.links[PLACE]}"
+        self.recipe_name.config(text=f"{self.recipes[PLACE]}")
+        self.ing_list.config(text=f"{self.individual_ingredients}")
+        self.site_link.config(text=f"{self.formatted_links}")
+        return PLACE
+
+    def prev_recipe(self):
+        global PLACE
+        try:
+            PLACE -= 1
+            self.individual_ingredients = '\n'.join(self.ingredients[PLACE])
+            self.recipe_name.config(text=f"{self.recipes[PLACE]}")
+            self.ing_list.config(text=f"{self.individual_ingredients}")
+            self.site_link.config(text=f"{self.links[PLACE]}")
+        except IndexError:
+            if PLACE < 0:
+                PLACE = len(self.recipes)
+        else:
+            return PLACE
+
+    def get_recipes(self):
+        app_id = "88167576"
+        app_key = "3112046b12a506f4d7edb5c691d4a0b4"
+        headers = {"Accept": "application/json"}
+        endpoint = "https://api.edamam.com/api/recipes/v2"
+        params = {
+            "type": "public",
+            "q": self.key_ingredient_entry.get().lower(),
+            "app_id": app_id,
+            "app_key": app_key,
+            "ingr": self.num_ingredients_entry.get(),
+            "mealType": self.meal.get(),
+            "cuisineType": self.culture.get(),
+            "diet": self.diet_req.get()
+        }
+        if params['diet'] == "":
+            params = {
+                "type": "public",
+                "q": self.key_ingredient_entry.get().lower(),
+                "app_id": app_id,
+                "app_key": app_key,
+                "ingr": self.num_ingredients_entry.get(),
+                "mealType": self.meal.get(),
+                "cuisineType": self.culture.get(),
+            }
+
+        response = requests.get(url=endpoint, headers=headers, params=params)
+        info = response.json()
+
+        try:
+            recipes = [(info['hits'][x]['recipe']['label']) for x in range(len(info['hits']))]
+            ingredients = [(info['hits'][x]['recipe']['ingredientLines']) for x in range(len(info['hits']))]
+            links = [(info['hits'][x]['recipe']['url']) for x in range(len(info['hits']))]
+        except (IndexError, TypeError, KeyError):
+            recipes = ""
+            ingredients = ""
+            links = ""
+
+        return recipes, ingredients, links
+
+    def go_to_site(self, url):
+        # OPENS RECIPE URL
+        webbrowser.open_new(url)
+
+    def search_error(self):
+        # ERROR MSG FOR BAD SEARCH PARAMS OR NO RESULTS
+        self.results.destroy()
+        messagebox.showinfo(title="Error", message="Oops! We can't find any recipes for that search.\n"
+                                                   "Please try altering your entries.")
+
+
+def main():
+    root = Tk()
+    Gui(root)
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
