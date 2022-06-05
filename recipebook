@@ -116,24 +116,24 @@ class Gui:
             self.formatted_ing = f"All you need for this recipe:\n" \
                                  f"{self.solo_ingredients}"
             self.recipe_name = Label(self.results, text=f"{self.recipes[PLACE]}", font=("Ariel", 20))
-            self.recipe_name.config(bg="#00B8A9", fg="#F9F7F7")
+            self.recipe_name.config(bg="#006E7F", fg="#F9F7F7")
             self.recipe_name.grid(column=1, row=1, columnspan=3)
             self.ing_list = Label(self.results, text=f"{self.formatted_ing}", font=("Ariel", 12))
-            self.ing_list.config(bg="#00B8A9", fg="#F9F7F7")
+            self.ing_list.config(bg="#006E7F", fg="#F9F7F7")
             self.ing_list.grid(column=1, row=3, columnspan=3)
             self.site_link = Label(self.results, text=f"{self.formatted_links}", font=("Ariel", 12))
             self.site_link.bind("<Button-1>", lambda e: self.go_to_site(self.links[PLACE]))
-            self.site_link.config(bg="#00B8A9", fg="#F9F7F7", cursor="hand2")
+            self.site_link.config(bg="#006E7F", fg="#F9F7F7", cursor="hand2")
             self.site_link.grid(column=1, row=5, columnspan=3)
 
             # RECIPE NAVIGATION BUTTONS
             self.f1 = Frame(self.results)
             self.f1.grid(column=1, row=7)
             self.next_button = Button(self.f1, text="Next", width=36, command=self.next_recipe)
-            self.next_button.config(font="Ariel", bg="#3D84A8", fg="#F9F7F7")
+            self.next_button.config(font="Ariel", bg="#006E7F", fg="#F9F7F7")
             self.next_button.pack(side="right")
             self.prev_button = Button(self.f1, text="Previous", width=36, command=self.prev_recipe)
-            self.prev_button.config(font="Ariel", bg="#3D84A8", fg="#F9F7F7")
+            self.prev_button.config(font="Ariel", bg="#006E7F", fg="#F9F7F7")
             self.prev_button.pack(side="left")
         except IndexError:
             self.search_error()
