@@ -1,5 +1,5 @@
 # Recipebook
-A program that connects to the Edamam API and pulls recipes that fit the user specified requirements. A GUI allows users to fill in necessary info and displays various recipes in an easy to read format.
+A program that connects to the Edamam API and pulls recipes that fit the user specified requirements. A GUI created with tkinter allows users to fill in necessary info and displays various recipes in an easy to read format.
 ## Prerequisites
 1. Python 3.0+
 ## Edamam API set up
