@@ -126,6 +126,12 @@ class Gui:
             self.site_link.config(bg="#006E7F", fg="#F9F7F7", cursor="hand2")
             self.site_link.grid(column=1, row=5, columnspan=3)
 
+            # SAVE RECIPE BUTTON
+            self.save_button = Button(self.results, text="Save recipe", font=("Ariel", 15), width=18,
+                                      command=self.save_recipe)
+            self.save_button.config(font="Ariel", bg="#006E7F", fg="#F9F7F7")
+            self.save_button.grid(column=1, row=9)
+
             # RECIPE NAVIGATION BUTTONS
             self.f1 = Frame(self.results)
             self.f1.grid(column=1, row=7)
@@ -164,6 +170,20 @@ class Gui:
                 PLACE = len(self.recipes)
         else:
             return PLACE
+
+    def save_recipe(self):
+        try:
+            save = open("Recipes.txt", "a")
+            save.write(f"{self.recipes[PLACE]} \n"
+                       f"{self.solo_ingredients}\n"
+                       f"{self.links[PLACE]}\n"
+                       f"\n")
+        except FileNotFoundError:
+            save = open("Recipes.txt", "w")
+            save.write(f"{self.recipes[PLACE]} \n"
+                       f"{self.solo_ingredients}\n"
+                       f"{self.links[PLACE]}\n"
+                       f"\n")
 
     def get_recipes(self):
         app_id = "YOUR APP ID HERE"
